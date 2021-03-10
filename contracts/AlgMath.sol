@@ -20,6 +20,26 @@ contract AlgMath {
 		Number[] operands;
 	}
 
+	function toBytes(Number memory number) internal pure returns(bytes memory) {
+		bytes[] memory operandBytes = new bytes[](number.operands.length);
+		uint256 operandBytesLen;
+		for (uint256 i = 0; i < number.operands.length; i++) {
+			bytes memory converted = toBytes(number.operands[i]);	
+			operandBytesLen += converted.length;
+			operandBytes[i] = converted;
+		}
+		uint256 retLen = 8 + 256 + 8 + 8 + 8 + operandBytesLen;
+		bytes memory ret = new bytes(operandBytesLen);
+		uint256 idx;
+		for (uint256 i = 0; i < number.operands.length; i++) {
+			for (uint256 j = 0; j < operandBytes[i].length; j++) {
+				ret[idx] = operandBytes[i][j];
+				idx++;	
+			}	
+		}
+		return ret;
+	}
+
 	function value(Number memory number) internal pure returns(bool ok, int256 val) {
 		Number memory resNumber = resolve(number);
 		if (resNumber.state != State.resolved) {
