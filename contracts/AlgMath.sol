@@ -29,7 +29,7 @@ contract AlgMath {
 			operandBytes[i] = converted;
 		}
 		uint256 retLen = 8 + 256 + 8 + 8 + 8 + operandBytesLen;
-		bytes memory ret = new bytes(operandBytesLen);
+		bytes memory ret = new bytes(retLen);
 		uint256 idx;
 		for (uint256 i = 0; i < number.operands.length; i++) {
 			for (uint256 j = 0; j < operandBytes[i].length; j++) {
