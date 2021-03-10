@@ -1,10 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.7.0;
 
-import "hardhat/console.sol";
-
-
-contract AlgMath {
+contract AlgMath { // TODO break up into modules
 
 	enum State { indeterminant, determinant, resolved }
 	enum Operation { none, negation, addition, subtraction, multiplication, division, exponentiation, root, sin, cos, tan, imaginary }
