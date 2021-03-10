@@ -41,6 +41,17 @@ contract AlgMath {
 	        return abi.encodePacked(operation)[0];
 	}
 
+	function int256ToBytes(int256 i) internal pure returns(bytes32) {
+		bytes32 ret;
+		if (i >= 0) {
+			ret = bytes32(uint256(i));
+			return ret;
+		}
+		// TODO
+		revert(); // have not written this case yet
+		return ret;
+	}
+
 	function toBytes(Number memory number) internal returns(bytes memory) {
 		bytes[] memory operandBytes = new bytes[](number.operands.length);
 		uint256 operandBytesLen;
@@ -54,8 +65,12 @@ contract AlgMath {
 		// state
 
 		ret[0] = stateToByte(number.state);
-		// resolvedValue
-		// TODO
+
+		bytes32 resolvedValueBytes = int256ToBytes(number.resolvedValue);
+		uint256 idx = 1;
+		for (uint256 i = 0; i < resolvedValueBytes.length; i++) {
+			ret[idx + i] = resolvedValueBytes[i];
+		}
 		// negated
 
 		ret[33] = boolToByte(number.negated);
@@ -66,7 +81,7 @@ contract AlgMath {
 		
 		ret[35] = operationToByte(number.operation);
 		// operands
-		uint256 idx = 1 + 32 + 1 + 1 + 1;
+		idx = 1 + 32 + 1 + 1 + 1;
 		for (uint256 i = 0; i < number.operands.length; i++) {
 			for (uint256 j = 0; j < operandBytes[i].length; j++) {
 				ret[idx] = operandBytes[i][j];
