@@ -9,8 +9,10 @@ describe("AlgMath", function() {
     await bMath.deployed();
     
     bMath.demo();
-    let val = await bMath._value();
-    console.log(val);
+    let v1 = await bMath._value1();
+    let v2 = await bMath._value2();
+    console.log(v1);
+    console.log(v2);
 	  /*const Greeter = await ethers.getContractFactory("Greeter");
     const greeter = await Greeter.deploy("Hello, world!");
     

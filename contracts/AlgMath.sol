@@ -14,6 +14,7 @@ contract AlgMath {
 		// if determinant
 		int256 resolvedValue;
 		// if unresolved
+		uint256 complexity;
 		bool negated;
 		bool imaginary;
 		Operation operation;
@@ -60,7 +61,7 @@ contract AlgMath {
 			operandBytesLen += converted.length;
 			operandBytes[i] = converted;
 		}
-		uint256 retLen = 1 + 32 + 1 + 1 + 1 + operandBytesLen;
+		uint256 retLen = 1 + 32 + 32 + 1 + 1 + 1 + operandBytesLen;
 		bytes memory ret = new bytes(retLen);
 		// state
 
@@ -70,6 +71,13 @@ contract AlgMath {
 		uint256 idx = 1;
 		for (uint256 i = 0; i < resolvedValueBytes.length; i++) {
 			ret[idx + i] = resolvedValueBytes[i];
+		}
+
+		// complexity
+		bytes32 bComplexity = bytes32(number.complexity);
+		idx += resolvedValueBytes.length;
+		for (uint256 i = 0; i < bComplexity.length; i++) {
+			ret[idx + 1] = bComplexity[i];	
 		}
 		// negated
 
@@ -105,6 +113,7 @@ contract AlgMath {
 		return Number(
 			State.indeterminant,
 			0,
+			0,
 			false,
 			false,
 			Operation.none,
@@ -113,7 +122,7 @@ contract AlgMath {
 
 	function newDeterminantNumber(int256 base) internal pure returns (Number memory) {
 		Number[] memory emptyOperands;
-		return Number(State.determinant, base, false, false, Operation.none, emptyOperands);
+		return Number(State.determinant, base, 0, false, false, Operation.none, emptyOperands);
 	}
 
 	function negate(Number memory number) internal pure returns (Number memory) {
@@ -121,10 +130,23 @@ contract AlgMath {
 		return number; 
 	}
 
+	function maxComplexity(Number[] memory operands) private pure returns (uint256) {
+		uint256 max;
+		for (uint256 i = 0; i < operands.length; i++) {
+			if (operands[i].complexity > max) {
+				max = operands[i].complexity;	
+			}
+		}
+		return max;
+	}
+
 	function binaryOp(Number[] memory operands, Operation operation) internal pure returns (Number memory) {
+		uint256 complexity = maxComplexity(operands);
+		complexity++;
 		Number memory ret = Number( 
 			State.determinant, 
 			0, 
+			complexity,
 			false, 
 			false, 
 			operation, 
