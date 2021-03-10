@@ -20,7 +20,28 @@ contract AlgMath {
 		Number[] operands;
 	}
 
-	function toBytes(Number memory number) internal pure returns(bytes memory) {
+	function boolToByte(bool tf) internal pure returns(byte) {
+		if (tf) {
+			return byte(0x01);
+		}
+		return byte(0x00);
+	}
+
+	function stateToByte(State state) internal pure returns(byte) {
+		if (state == State.indeterminant) {
+			return byte(0x00);
+		}
+		return abi.encodePacked(state)[0];
+	}
+
+	function operationToByte(Operation operation) internal pure returns(byte) {
+		if (operation == Operation.none) {
+			return byte(0x00);	
+		}
+	        return abi.encodePacked(operation)[0];
+	}
+
+	function toBytes(Number memory number) internal returns(bytes memory) {
 		bytes[] memory operandBytes = new bytes[](number.operands.length);
 		uint256 operandBytesLen;
 		for (uint256 i = 0; i < number.operands.length; i++) {
@@ -28,20 +49,24 @@ contract AlgMath {
 			operandBytesLen += converted.length;
 			operandBytes[i] = converted;
 		}
-		uint256 retLen = 8 + 256 + 8 + 8 + 8 + operandBytesLen;
+		uint256 retLen = 1 + 32 + 1 + 1 + 1 + operandBytesLen;
 		bytes memory ret = new bytes(retLen);
 		// state
-		// TODO
+
+		ret[0] = stateToByte(number.state);
 		// resolvedValue
 		// TODO
 		// negated
-		// TODO
+
+		ret[33] = boolToByte(number.negated);
 		// imaginary
-		// TODO
+		
+		ret[34] = boolToByte(number.imaginary);
 		// operation
-		// TODO
+		
+		ret[35] = operationToByte(number.operation);
 		// operands
-		uint256 idx = 8 + 256 + 8 + 8 + 8;
+		uint256 idx = 1 + 32 + 1 + 1 + 1;
 		for (uint256 i = 0; i < number.operands.length; i++) {
 			for (uint256 j = 0; j < operandBytes[i].length; j++) {
 				ret[idx] = operandBytes[i][j];
