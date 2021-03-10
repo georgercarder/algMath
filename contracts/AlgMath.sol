@@ -9,7 +9,7 @@ contract AlgMath {
 	enum State { indeterminant, determinant, resolved }
 	enum Operation { none, negation, addition, subtraction, multiplication, division, exponentiation, root, sin, cos, tan, imaginary }
 
-	uint256 private thresholdComplexity = 32;
+	uint256 private thresholdComplexity = 32; // DUMMY for now
 
 	mapping (bytes32 => Number) resolvedCache;
 	
