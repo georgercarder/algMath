@@ -8,6 +8,8 @@ contract AlgMath {
 
 	enum State { indeterminant, determinant, resolved }
 	enum Operation { none, negation, addition, subtraction, multiplication, division, exponentiation, root, sin, cos, tan, imaginary }
+
+	uint256 private thresholdComplexity = 32;
 	
 	struct Number {
 		State state;
@@ -99,7 +101,7 @@ contract AlgMath {
 		return ret;
 	}
 
-	function value(Number memory number) internal pure returns(bool ok, int256 val) {
+	function value(Number memory number) internal view returns(bool ok, int256 val) {
 		Number memory resNumber = resolve(number);
 		if (resNumber.state != State.resolved) {
 			return (ok, val);
@@ -207,7 +209,7 @@ contract AlgMath {
 		return binaryOp(operand(number), Operation.imaginary);
 	}
 
-	function resolve(Number memory number) internal pure returns (Number memory) {
+	function resolve(Number memory number) internal view returns (Number memory) {
 		if (number.state == State.resolved || number.state == State.indeterminant) {
 			return number;
 		}
@@ -216,6 +218,9 @@ contract AlgMath {
 			ret.state = State.resolved;
 			ret.resolvedValue = number.resolvedValue;
 			return ret;
+		}
+		if (number.complexity > thresholdComplexity) {
+			// TODO CHECK CACHE
 		}
 		if (number.operation == Operation.negation) {
 			Number memory a = resolve(number.operands[0]);
