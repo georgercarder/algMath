@@ -10,6 +10,8 @@ contract AlgMath {
 	enum Operation { none, negation, addition, subtraction, multiplication, division, exponentiation, root, sin, cos, tan, imaginary }
 
 	uint256 private thresholdComplexity = 32;
+
+	mapping (bytes32 => Number) resolvedCache;
 	
 	struct Number {
 		State state;
@@ -101,7 +103,7 @@ contract AlgMath {
 		return ret;
 	}
 
-	function value(Number memory number) internal view returns(bool ok, int256 val) {
+	function value(Number memory number) internal returns(bool ok, int256 val) {
 		Number memory resNumber = resolve(number);
 		if (resNumber.state != State.resolved) {
 			return (ok, val);
@@ -209,7 +211,15 @@ contract AlgMath {
 		return binaryOp(operand(number), Operation.imaginary);
 	}
 
-	function resolve(Number memory number) internal view returns (Number memory) {
+	function checkCache(Number memory number) private view returns(Number memory ret, bool ok) {
+		// TODO
+	}
+
+	function setCache(Number memory key, Number memory value) private {
+		// TODO
+	}
+
+	function resolve(Number memory number) internal returns (Number memory) {
 		if (number.state == State.resolved || number.state == State.indeterminant) {
 			return number;
 		}
@@ -219,8 +229,13 @@ contract AlgMath {
 			ret.resolvedValue = number.resolvedValue;
 			return ret;
 		}
+		bool mustSetCache;
 		if (number.complexity > thresholdComplexity) {
-			// TODO CHECK CACHE
+			(Number memory cached, bool ok) = checkCache(number);
+			if (ok) {
+				return cached;
+			}
+			mustSetCache = true;
 		}
 		if (number.operation == Operation.negation) {
 			Number memory a = resolve(number.operands[0]);
@@ -230,6 +245,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			ret.resolvedValue = - a.resolvedValue;
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.addition) {
@@ -241,6 +257,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			ret.resolvedValue = a.resolvedValue + b.resolvedValue; // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.subtraction) {
@@ -252,6 +269,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			ret.resolvedValue = a.resolvedValue - b.resolvedValue; // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.multiplication) {
@@ -263,6 +281,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			ret.resolvedValue = a.resolvedValue * b.resolvedValue; // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.division) {
@@ -274,6 +293,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			ret.resolvedValue = a.resolvedValue / b.resolvedValue; // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.exponentiation) {
@@ -285,6 +305,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			// TODO ret.resolvedValue = pow(a.resolvedValue, b.resolvedValue); // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		if (number.operation == Operation.root) {
@@ -296,6 +317,7 @@ contract AlgMath {
 			}	
 			ret.state = State.resolved;
 			// TODO ret.resolvedValue = root(a.resolvedValue, b.resolvedValue); // TODO SAFEMATH
+			if (mustSetCache) setCache(number, ret);
 			return ret;
 		}
 		// ETC .........
