@@ -208,11 +208,38 @@ contract AlgMath { // TODO break up into modules
 		return binaryOp(operand(number), Operation.imaginary);
 	}
 
-	function checkCache(Number memory number) private view returns(Number memory ret, bool ok) {
-		// TODO
+	function numberIsNontrivial(Number storage number) internal returns(bool) {
+		if (number.state != State.indeterminant) return true;
+		if (number.resolvedValue > 0) return  true;
+		if (number.complexity > 0) return  true;
+		if (number.negated) return  true;
+		if (number.imaginary) return  true;
+		if (number.operation != Operation.none) return  true;
+		if (number.operands.length > 0) return  true;
+		return false;
 	}
 
-	function setCache(Number memory key, Number memory value) private {
+	function storageToMemory(Number storage number) private returns(Number memory ret, bool nonTrivial) {
+		nonTrivial = numberIsNontrivial(number);
+		if (!nonTrivial) {
+			return (ret, nonTrivial);
+		}
+		ret.state = number.state;
+		ret.resolvedValue = number.resolvedValue;
+		ret.complexity = number.complexity;
+		ret.negated = number.negated;
+		ret.imaginary = number.imaginary;
+		ret.operation = number.operation;
+		ret.operands = number.operands;
+	}
+
+	function checkCache(Number memory number) private returns(Number memory ret, bool ok) {
+		bytes32 hash = keccak256(toBytes(number));
+		Number storage cached = resolvedCache[hash];
+		(ret, ok) = storageToMemory(cached);
+	}
+
+	function setCache(Number memory key, Number memory val) private {
 		// TODO
 	}
 
